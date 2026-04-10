@@ -17,36 +17,27 @@ body {
   padding: 40px;
 }
 
-/* CLOCK */
 .clock {
   font-size: 120px;
   font-weight: 200;
 }
 
-/* DATE */
 .date {
   font-size: 22px;
   opacity: 0.6;
   margin-bottom: 30px;
 }
 
-/* GRID */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
-/* CARD */
 .card {
   background: rgba(255,255,255,0.03);
   border-radius: 15px;
   padding: 20px;
-  transition: 0.3s;
-}
-
-.card:hover {
-  background: rgba(255,255,255,0.05);
 }
 
 .title {
@@ -88,14 +79,14 @@ body {
     <div class="value" id="quote">--</div>
   </div>
 
-<div class="card">
-  <div class="title">Tráfico</div>
-  <iframe id="map"
-    width="100%"
-    height="150"
-    style="border-radius:10px;border:0;">
-  </iframe>
-</div>
+  <div class="card">
+    <div class="title">Tráfico</div>
+    <iframe id="map"
+      width="100%"
+      height="150"
+      style="border-radius:10px;border:0;">
+    </iframe>
+  </div>
 
   <div class="card">
     <div class="title">Boca Juniors</div>
@@ -106,7 +97,7 @@ body {
 
 <script>
 
-// CLOCK + STATUS
+// ⏰ CLOCK + STATUS
 function updateClock() {
   var now = new Date();
 
@@ -130,27 +121,18 @@ function updateClock() {
   else if (h >= 12 && h < 19) status = "Tarde 🌤";
 
   document.getElementById("status").innerHTML = status;
-
-  // 🚗 TRÁFICO SIMPLE
-  var traffic = "Bajo 🚗";
-  if ((h >= 8 && h <= 10) || (h >= 18 && h <= 20)) {
-    traffic = "Alto 🚗🚗";
-  } else if (h >= 11 && h <= 17) {
-    traffic = "Medio 🚗";
-  }
-
-  document.getElementById("traffic").innerHTML = traffic;
 }
 
 setInterval(updateClock, 1000);
 updateClock();
 
 
-// CLIMA + CIUDAD
+// 📍 GEO + CLIMA + MAPA
 navigator.geolocation.getCurrentPosition(function(pos) {
   var lat = pos.coords.latitude;
   var lon = pos.coords.longitude;
 
+  // 🌡️ CLIMA
   fetch("https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true")
     .then(r => r.json())
     .then(data => {
@@ -158,63 +140,50 @@ navigator.geolocation.getCurrentPosition(function(pos) {
         data.current_weather.temperature + "°C";
     });
 
+  // 📍 CIUDAD
   fetch("https://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lon)
     .then(r => r.json())
     .then(data => {
       document.getElementById("city").innerHTML =
         data.address.city || data.address.town;
     });
+
+  // 🗺️ MAPA
+  var mapUrl = "https://maps.google.com/maps?q=" + lat + "," + lon + "&z=14&output=embed";
+  document.getElementById("map").src = mapUrl;
+
+  // 👉 ABRIR TRÁFICO REAL
+  document.getElementById("map").onclick = function() {
+    window.open("https://www.google.com/maps/@"+lat+","+lon+",14z/data=!5m1!1e1");
+  };
+
 });
 
 
-// FRASES
+// 🧠 FRASES
 var quotes = [
   "Disciplina > motivación",
   "Progreso constante",
   "Menos distracciones, más foco",
   "Hoy haces tu futuro",
   "Hacelo aunque no tengas ganas",
-  "Desarrolla el éxito a partir de los fracasos",
-  "El éxito es obtener lo que quieres; la felicidad es querer lo que obtienes",
-  "Solo un pequeño pensamiento positivo por la mañana puede cambiar todo tu día",
-  "Hazlo lo mejor que puedas. Nadie puede hacer más que eso",
-  "Prefiero arrepentirme de las cosas que he hecho, que arrepentirme de las que no he hecho"
+  "El éxito es consistencia diaria",
+  "Menos excusas, más acción"
 ];
 
 document.getElementById("quote").innerHTML =
   quotes[Math.floor(Math.random() * quotes.length)];
 
 
-// ⚽ BOCA INFO SIMPLE
-fetch("https://api.allorigins.win/raw?url=https://www.espn.com/soccer/team/results/_/id/5/boca-juniors")
-  .then(() => {
-    // Datos mock dinámicos (evitamos bloqueo de APIs en iPad viejo)
+// ⚽ BOCA INFO
+var lastMatch = "vs Universidad Católica (2-1) ✅";
+var nextMatch = "vs Independiente - 11/04 19:30";
 
-    var lastMatch = "vs Universidad Católica (2-1) ✅";
-    var nextMatch = "vs Independiente - 11/04 19:30";
-
-    document.getElementById("boca").innerHTML =
-      "Último: " + lastMatch + "<br><br>" +
-      "Próximo: " + nextMatch;
-  })
-  .catch(() => {
-    document.getElementById("boca").innerHTML = "Sin datos";
-  });
-  navigator.geolocation.getCurrentPosition(function(pos) {
-  var lat = pos.coords.latitude;
-  var lon = pos.coords.longitude;
-
-  // MAPA
-  var mapUrl = "https://maps.google.com/maps?q=" + lat + "," + lon + "&z=14&output=embed";
-  document.getElementById("map").src = mapUrl;
-
-  // LINK A TRÁFICO REAL
-  document.getElementById("map").onclick = function() {
-    window.open("https://www.google.com/maps/@"+lat+","+lon+",14z/data=!5m1!1e1");
-  };
-});
+document.getElementById("boca").innerHTML =
+  "Último: " + lastMatch + "<br><br>" +
+  "Próximo: " + nextMatch;
 
 </script>
 
 </body>
-</html> 
+</html>
