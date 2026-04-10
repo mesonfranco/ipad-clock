@@ -2,53 +2,76 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Minimal Dashboard</title>
+<title>Dashboard Boca</title>
 
 <style>
+
+/* 🌌 FONDO BOCA */
 body {
   margin: 0;
-  background: #0b0b0b;
-  color: #e0f7f7;
+  color: #f5d76e;
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
   height: 100vh;
   padding: 40px;
+
+  background: 
+    linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)),
+    url("https://images.unsplash.com/photo-1602107545903-4b2d84b84b8c");
+
+  background-size: cover;
+  background-position: center;
 }
 
+/* ⏰ CLOCK */
 .clock {
   font-size: 120px;
   font-weight: 200;
+  color: #f5d76e;
 }
 
+/* 📅 DATE */
 .date {
   font-size: 22px;
-  opacity: 0.6;
+  opacity: 0.8;
   margin-bottom: 30px;
 }
 
+/* GRID */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
+/* 🧊 CARDS */
 .card {
-  background: rgba(255,255,255,0.03);
+  background: rgba(0, 32, 91, 0.6); /* azul boca */
   border-radius: 15px;
   padding: 20px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(245, 215, 110, 0.2);
+  transition: 0.3s;
 }
 
+.card:hover {
+  background: rgba(0, 32, 91, 0.75);
+}
+
+/* TITULOS */
 .title {
   font-size: 14px;
-  opacity: 0.5;
+  color: #ffd700;
+  opacity: 0.8;
   margin-bottom: 10px;
+  text-transform: uppercase;
 }
 
+/* VALORES */
 .value {
   font-size: 22px;
+  color: #ffffff;
 }
+
 </style>
 </head>
 
@@ -60,7 +83,7 @@ body {
 <div class="grid">
 
   <div class="card">
-    <div class="title">Clima actual</div>
+    <div class="title">Clima</div>
     <div class="value" id="weather">--</div>
   </div>
 
@@ -73,6 +96,113 @@ body {
     <div class="title">Estado del día</div>
     <div class="value" id="status">--</div>
   </div>
+
+  <div class="card">
+    <div class="title">Frase</div>
+    <div class="value" id="quote">--</div>
+  </div>
+
+  <div class="card">
+    <div class="title">Próximas horas</div>
+    <div class="value" id="forecast">Cargando...</div>
+  </div>
+
+  <div class="card">
+    <div class="title">Boca Juniors</div>
+    <div class="value" id="boca">Cargando...</div>
+  </div>
+
+</div>
+
+<script>
+
+// ⏰ CLOCK
+function updateClock() {
+  var now = new Date();
+
+  var h = now.getHours();
+  var m = now.getMinutes();
+
+  if (h < 10) h = "0" + h;
+  if (m < 10) m = "0" + m;
+
+  document.getElementById("clock").innerHTML = h + ":" + m;
+
+  document.getElementById("date").innerHTML =
+    now.toLocaleDateString("es-ES", {
+      weekday: "long",
+      day: "numeric",
+      month: "long"
+    });
+
+  var status = "Noche 🌙";
+  if (h >= 6 && h < 12) status = "Mañana ☀️";
+  else if (h >= 12 && h < 19) status = "Tarde 🌤";
+
+  document.getElementById("status").innerHTML = status;
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+
+
+// 📍 GEO + CLIMA
+navigator.geolocation.getCurrentPosition(function(pos) {
+  var lat = pos.coords.latitude;
+  var lon = pos.coords.longitude;
+
+  fetch("https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&hourly=temperature_2m&current_weather=true")
+    .then(r => r.json())
+    .then(data => {
+
+      document.getElementById("weather").innerHTML =
+        data.current_weather.temperature + "°C";
+
+      var hours = data.hourly.temperature_2m.slice(0, 4);
+
+      document.getElementById("forecast").innerHTML =
+        "Ahora: " + hours[0] + "°C<br>" +
+        "+1h: " + hours[1] + "°C<br>" +
+        "+2h: " + hours[2] + "°C<br>" +
+        "+3h: " + hours[3] + "°C";
+    });
+
+  fetch("https://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lon)
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById("city").innerHTML =
+        data.address.city || data.address.town;
+    });
+
+});
+
+
+// 🧠 FRASES
+var quotes = [
+  "Disciplina > motivación",
+  "Progreso constante",
+  "Menos distracciones, más foco",
+  "Hoy haces tu futuro",
+  "Hacelo aunque no tengas ganas",
+  "El éxito es consistencia diaria"
+];
+
+document.getElementById("quote").innerHTML =
+  quotes[Math.floor(Math.random() * quotes.length)];
+
+
+// ⚽ BOCA INFO
+var lastMatch = "vs Universidad Católica (2-1) 🔥";
+var nextMatch = "vs Independiente - 11/04 19:30";
+
+document.getElementById("boca").innerHTML =
+  "Último: " + lastMatch + "<br><br>" +
+  "Próximo: " + nextMatch;
+
+</script>
+
+</body>
+</html>  </div>
 
   <div class="card">
     <div class="title">Frase</div>
