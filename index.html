@@ -2,74 +2,103 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Matrix Dashboard</title>
+<title>Minimal Dashboard</title>
 
 <style>
 body {
   margin: 0;
-  background: black;
-  color: #00ff41;
-  font-family: monospace;
-  overflow: hidden;
+  background: #0b0b0b;
+  color: #e0f7f7;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100vh;
+  padding: 40px;
+  transition: background 0.5s;
 }
 
-.container {
+/* CLOCK */
+.clock {
+  font-size: 120px;
+  font-weight: 200;
+  letter-spacing: 5px;
+}
+
+/* DATE */
+.date {
+  font-size: 22px;
+  opacity: 0.6;
+  margin-bottom: 30px;
+}
+
+/* GRID */
+.grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  height: 100vh;
-  padding: 20px;
+  grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
-.clock {
-  font-size: 150px;
-  text-shadow: 0 0 20px #00ff41;
+/* CARD */
+.card {
+  background: rgba(255,255,255,0.03);
+  border-radius: 15px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  transition: 0.3s;
 }
 
-.panel {
-  border: 1px solid rgba(0,255,65,0.2);
-  padding: 15px;
-  background: rgba(0,255,65,0.05);
+.card:hover {
+  background: rgba(255,255,255,0.05);
 }
 
-h3 {
-  margin-top: 0;
+.title {
+  font-size: 14px;
+  opacity: 0.5;
+  margin-bottom: 10px;
 }
 
-/* MATRIX RAIN */
-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: -1;
+.value {
+  font-size: 28px;
+}
+
+/* FADE */
+.fade {
+  animation: fade 1s ease;
+}
+
+@keyframes fade {
+  from {opacity: 0;}
+  to {opacity: 1;}
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="matrix"></canvas>
+<div class="clock" id="clock">--:--</div>
+<div class="date" id="date"></div>
 
-<div class="container">
+<div class="grid">
 
-  <div>
-    <div class="clock" id="clock">--:--</div>
-    <div id="date"></div>
+  <div class="card">
+    <div class="title">Clima</div>
+    <div class="value" id="weather">Cargando...</div>
   </div>
 
-  <div class="panel">
-    <div id="weather"></div>
-    <div id="city"></div>
+  <div class="card">
+    <div class="title">Ubicación</div>
+    <div class="value" id="city">--</div>
   </div>
 
-  <div class="panel">
-    <h3>Eventos</h3>
-    <ul id="events"></ul>
+  <div class="card">
+    <div class="title">Estado del día</div>
+    <div class="value" id="status"></div>
   </div>
 
-  <div class="panel">
-    <h3>Sistema</h3>
-    <div id="system"></div>
+  <div class="card">
+    <div class="title">Frase</div>
+    <div class="value" id="quote"></div>
   </div>
 
 </div>
@@ -94,13 +123,21 @@ function updateClock() {
       day: "numeric",
       month: "long"
     });
+
+  // estado del día
+  var status = "Noche";
+  if (h >= 6 && h < 12) status = "Mañana ☀️";
+  else if (h >= 12 && h < 19) status = "Tarde 🌤";
+  else status = "Noche 🌙";
+
+  document.getElementById("status").innerHTML = status;
 }
 
 setInterval(updateClock, 1000);
 updateClock();
 
 
-// CLIMA
+// CLIMA + UBICACIÓN
 navigator.geolocation.getCurrentPosition(function(pos) {
   var lat = pos.coords.latitude;
   var lon = pos.coords.longitude;
@@ -109,7 +146,7 @@ navigator.geolocation.getCurrentPosition(function(pos) {
     .then(r => r.json())
     .then(data => {
       document.getElementById("weather").innerHTML =
-        "Temp: " + data.current_weather.temperature + "°C";
+        data.current_weather.temperature + "°C";
     });
 
   fetch("https://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lon)
@@ -121,117 +158,17 @@ navigator.geolocation.getCurrentPosition(function(pos) {
 });
 
 
-// 📆 GOOGLE EVENTS
-fetch("/api/events")
-  .then(r => r.json())
-  .then(events => {
-    var ul = document.getElementById("events");
-    ul.innerHTML = "";
-
-    events.forEach(e => {
-      var li = document.createElement("li");
-      li.textContent = e.title;
-      ul.appendChild(li);
-    });
-  });
-
-
-// 📊 SISTEMA INFO
-document.getElementById("system").innerHTML =
-  "User Agent: " + navigator.userAgent;
-
-
-// MATRIX RAIN
-var canvas = document.getElementById("matrix");
-var ctx = canvas.getContext("2d");
-
-canvas.height = window.innerHeight;
-canvas.width = window.innerWidth;
-
-var letters = "01";
-letters = letters.split("");
-
-var fontSize = 14;
-var columns = canvas.width / fontSize;
-
-var drops = [];
-for (var x = 0; x < columns; x++)
-  drops[x] = 1;
-
-function draw() {
-  ctx.fillStyle = "rgba(0,0,0,0.05)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = "#0f0";
-  ctx.font = fontSize + "px monospace";
-
-  for (var i = 0; i < drops.length; i++) {
-    var text = letters[Math.floor(Math.random()*letters.length)];
-    ctx.fillText(text, i*fontSize, drops[i]*fontSize);
-
-    if (drops[i]*fontSize > canvas.height && Math.random() > 0.975)
-      drops[i] = 0;
-
-    drops[i]++;
-  }
-}
-
-setInterval(draw, 33);
-
-</script>
-
-</body>
-</html>    });
-}
-
-setInterval(updateClock, 1000);
-updateClock();
-
-
-// 🌡️ CLIMA + CIUDAD
-if (navigator.geolocation) {
-  navigator.geolocation.getCurrentPosition(function(pos) {
-
-    var lat = pos.coords.latitude;
-    var lon = pos.coords.longitude;
-
-    fetch("https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true")
-      .then(r => r.json())
-      .then(data => {
-        document.getElementById("weather").innerHTML =
-          data.current_weather.temperature + "°C";
-      });
-
-    // ciudad
-    fetch("https://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lon)
-      .then(r => r.json())
-      .then(data => {
-        document.getElementById("city").innerHTML =
-          data.address.city || data.address.town || "";
-      });
-
-  }, function() {
-    document.getElementById("weather").innerHTML = "Permiso ubicación denegado";
-  });
-} else {
-  document.getElementById("weather").innerHTML = "Geolocalización no soportada";
-}
-
-
-// EVENTOS DEMO
-var eventos = [
-  "10:00 - Trabajo",
-  "13:00 - Almuerzo",
-  "18:00 - Gym"
+// FRASES
+var quotes = [
+  "Disciplina > motivación",
+  "Lo que haces hoy define tu futuro",
+  "Menos distracciones, más foco",
+  "Progreso > perfección",
+  "Hazlo aunque no tengas ganas"
 ];
 
-var ul = document.getElementById("events");
-
-eventos.forEach(function(e) {
-  var li = document.createElement("li");
-  li.textContent = e;
-  ul.appendChild(li);
-});
+document.getElementById("quote").innerHTML =
+  quotes[Math.floor(Math.random() * quotes.length)];
 
 </script>
 
