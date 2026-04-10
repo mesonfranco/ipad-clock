@@ -49,6 +49,12 @@ body {
 .value {
   font-size: 24px;
 }
+
+#mapFallback {
+  margin-top: 10px;
+  font-size: 14px;
+  opacity: 0.6;
+}
 </style>
 </head>
 
@@ -84,8 +90,9 @@ body {
     <iframe id="map"
       width="100%"
       height="150"
-      style="border-radius:10px;border:0;">
+      style="border-radius:10px;border:0;background:#111;">
     </iframe>
+    <div id="mapFallback">Tocá para abrir mapa</div>
   </div>
 
   <div class="card">
@@ -127,7 +134,7 @@ setInterval(updateClock, 1000);
 updateClock();
 
 
-// 📍 GEO + CLIMA + MAPA
+// 📍 GEO + CLIMA + MAPA (FIX iPad)
 navigator.geolocation.getCurrentPosition(function(pos) {
   var lat = pos.coords.latitude;
   var lon = pos.coords.longitude;
@@ -148,15 +155,23 @@ navigator.geolocation.getCurrentPosition(function(pos) {
         data.address.city || data.address.town;
     });
 
-  // 🗺️ MAPA
-  var mapUrl = "https://maps.google.com/maps?q=" + lat + "," + lon + "&z=14&output=embed";
-  document.getElementById("map").src = mapUrl;
+  // 🗺️ MAPA (delay fix Safari)
+  var map = document.getElementById("map");
 
-  // 👉 ABRIR TRÁFICO REAL
-  document.getElementById("map").onclick = function() {
+  setTimeout(function() {
+    map.src = "https://maps.google.com/maps?q=" + lat + "," + lon + "&z=14&output=embed";
+  }, 500);
+
+  // 👉 abrir tráfico real
+  var openMap = function() {
     window.open("https://www.google.com/maps/@"+lat+","+lon+",14z/data=!5m1!1e1");
   };
 
+  map.onclick = openMap;
+  document.getElementById("mapFallback").onclick = openMap;
+
+}, function() {
+  document.getElementById("mapFallback").innerHTML = "Permitir ubicación";
 });
 
 
@@ -175,7 +190,7 @@ document.getElementById("quote").innerHTML =
   quotes[Math.floor(Math.random() * quotes.length)];
 
 
-// ⚽ BOCA INFO
+// ⚽ BOCA INFO 💙💛
 var lastMatch = "vs Universidad Católica (2-1) ✅";
 var nextMatch = "vs Independiente - 11/04 19:30";
 
