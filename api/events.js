@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-  const url = https://calendar.google.com/calendar/ical/franco%40visualblasters.com/public/basic.ics;
+  const url = "https://calendar.google.com/calendar/ical/franco%40visualblasters.com/public/basic.ics";
 
   const response = await fetch(url);
   const text = await response.text();
