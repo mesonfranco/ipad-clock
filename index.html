@@ -11,17 +11,19 @@ html, body {
   height: 100%;
 }
 
-/* 🌌 FONDO BOCA REAL (COMPATIBLE) */
+/* 🔥 FONDO BOCA (FIX REAL) */
 body {
-  color: #f5d76e;
+  color: #ffd700;
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   padding: 40px;
 
-  background-image: linear-gradient(
-    rgba(0,0,0,0.75),
-    rgba(0,0,0,0.85)
-  ),
-  url("https://upload.wikimedia.org/wikipedia/commons/3/3f/La_12_Boca_Juniors.jpg");
+  /* fallback color */
+  background-color: #0b1d3a;
+
+  /* imagen */
+  background-image: 
+    linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.85)),
+    url("https://i.imgur.com/8Km9tLL.jpg");
 
   background-size: cover;
   background-position: center;
@@ -51,7 +53,7 @@ body {
 
 /* 🧊 CARDS */
 .card {
-  background: rgba(0, 32, 91, 0.75);
+  background: rgba(0, 32, 91, 0.85);
   border-radius: 15px;
   padding: 20px;
   border: 1px solid rgba(255, 215, 0, 0.2);
@@ -188,7 +190,7 @@ document.getElementById("quote").innerHTML =
   quotes[Math.floor(Math.random() * quotes.length)];
 
 
-// ⚽ BOCA INFO
+// ⚽ BOCA
 var lastMatch = "vs Universidad Católica (2-1) 🔥";
 var nextMatch = "vs Independiente - 11/04 19:30";
 
