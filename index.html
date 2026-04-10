@@ -15,14 +15,12 @@ body {
   justify-content: center;
   height: 100vh;
   padding: 40px;
-  transition: background 0.5s;
 }
 
 /* CLOCK */
 .clock {
   font-size: 120px;
   font-weight: 200;
-  letter-spacing: 5px;
 }
 
 /* DATE */
@@ -44,7 +42,6 @@ body {
   background: rgba(255,255,255,0.03);
   border-radius: 15px;
   padding: 20px;
-  backdrop-filter: blur(10px);
   transition: 0.3s;
 }
 
@@ -59,17 +56,7 @@ body {
 }
 
 .value {
-  font-size: 28px;
-}
-
-/* FADE */
-.fade {
-  animation: fade 1s ease;
-}
-
-@keyframes fade {
-  from {opacity: 0;}
-  to {opacity: 1;}
+  font-size: 24px;
 }
 </style>
 </head>
@@ -83,7 +70,7 @@ body {
 
   <div class="card">
     <div class="title">Clima</div>
-    <div class="value" id="weather">Cargando...</div>
+    <div class="value" id="weather">--</div>
   </div>
 
   <div class="card">
@@ -93,19 +80,29 @@ body {
 
   <div class="card">
     <div class="title">Estado del día</div>
-    <div class="value" id="status"></div>
+    <div class="value" id="status">--</div>
   </div>
 
   <div class="card">
     <div class="title">Frase</div>
-    <div class="value" id="quote"></div>
+    <div class="value" id="quote">--</div>
+  </div>
+
+  <div class="card">
+    <div class="title">Tráfico</div>
+    <div class="value" id="traffic">--</div>
+  </div>
+
+  <div class="card">
+    <div class="title">Boca Juniors</div>
+    <div class="value" id="boca">Cargando...</div>
   </div>
 
 </div>
 
 <script>
 
-// CLOCK
+// CLOCK + STATUS
 function updateClock() {
   var now = new Date();
 
@@ -124,20 +121,28 @@ function updateClock() {
       month: "long"
     });
 
-  // estado del día
-  var status = "Noche";
+  var status = "Noche 🌙";
   if (h >= 6 && h < 12) status = "Mañana ☀️";
   else if (h >= 12 && h < 19) status = "Tarde 🌤";
-  else status = "Noche 🌙";
 
   document.getElementById("status").innerHTML = status;
+
+  // 🚗 TRÁFICO SIMPLE
+  var traffic = "Bajo 🚗";
+  if ((h >= 8 && h <= 10) || (h >= 18 && h <= 20)) {
+    traffic = "Alto 🚗🚗";
+  } else if (h >= 11 && h <= 17) {
+    traffic = "Medio 🚗";
+  }
+
+  document.getElementById("traffic").innerHTML = traffic;
 }
 
 setInterval(updateClock, 1000);
 updateClock();
 
 
-// CLIMA + UBICACIÓN
+// CLIMA + CIUDAD
 navigator.geolocation.getCurrentPosition(function(pos) {
   var lat = pos.coords.latitude;
   var lon = pos.coords.longitude;
@@ -161,14 +166,33 @@ navigator.geolocation.getCurrentPosition(function(pos) {
 // FRASES
 var quotes = [
   "Disciplina > motivación",
-  "Lo que haces hoy define tu futuro",
+  "Progreso constante",
   "Menos distracciones, más foco",
-  "Progreso > perfección",
-  "Hazlo aunque no tengas ganas"
+  "Hoy haces tu futuro",
+  "Hacelo aunque no tengas ganas",
+  "Desarrolla el éxito a partir de los fracasos",
+  "El éxito es obtener lo que quieres; la felicidad es querer lo que obtienes",
+  "Solo un pequeño pensamiento positivo por la mañana puede cambiar todo tu día",
+  "Hazlo lo mejor que puedas. Nadie puede hacer más que eso",
+  "Prefiero arrepentirme de las cosas que he hecho, que arrepentirme de las que no he hecho"
 ];
 
 document.getElementById("quote").innerHTML =
   quotes[Math.floor(Math.random() * quotes.length)];
+
+
+// ⚽ BOCA INFO SIMPLE
+fetch("https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=Boca%20Juniors")
+  .then(r => r.json())
+  .then(data => {
+    if (data.teams && data.teams[0]) {
+      document.getElementById("boca").innerHTML =
+        "Activo 💙💛";
+    }
+  })
+  .catch(() => {
+    document.getElementById("boca").innerHTML = "Sin datos";
+  });
 
 </script>
 
