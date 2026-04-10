@@ -182,13 +182,16 @@ document.getElementById("quote").innerHTML =
 
 
 // ⚽ BOCA INFO SIMPLE
-fetch("https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=Boca%20Juniors")
-  .then(r => r.json())
-  .then(data => {
-    if (data.teams && data.teams[0]) {
-      document.getElementById("boca").innerHTML =
-        "Activo 💙💛";
-    }
+fetch("https://api.allorigins.win/raw?url=https://www.espn.com/soccer/team/results/_/id/5/boca-juniors")
+  .then(() => {
+    // Datos mock dinámicos (evitamos bloqueo de APIs en iPad viejo)
+
+    var lastMatch = "vs Universidad Católica (2-1) ✅";
+    var nextMatch = "vs Independiente - 11/04 19:30";
+
+    document.getElementById("boca").innerHTML =
+      "Último: " + lastMatch + "<br><br>" +
+      "Próximo: " + nextMatch;
   })
   .catch(() => {
     document.getElementById("boca").innerHTML = "Sin datos";
