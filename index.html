@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Smart Display</title>
+
+<style>
+body {
+  margin: 0;
+  background: radial-gradient(circle, #0a0a0a, #000);
+  color: #cfffff;
+  font-family: monospace;
+  overflow: hidden;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  height: 100vh;
+  padding: 30px;
+  gap: 20px;
+}
+
+.clock {
+  font-size: 160px;
+  letter-spacing: 12px;
+  text-shadow: 0 0 20px rgba(0,255,255,0.5);
+}
+
+.date {
+  font-size: 28px;
+  opacity: 0.8;
+}
+
+.panel {
+  backdrop-filter: blur(10px);
+  background: rgba(0,255,255,0.05);
+  border: 1px solid rgba(0,255,255,0.2);
+  border-radius: 15px;
+  padding: 20px;
+}
+
+.weather {
+  font-size: 42px;
+}
+
+.icon {
+  font-size: 30px;
+}
+
+.events li {
+  margin-bottom: 10px;
+}
+
+.small {
+  opacity: 0.6;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div>
+    <div class="clock" id="clock">00:00</div>
+    <div class="date" id="date"></div>
+  </div>
+
+  <div class="panel">
+    <div class="weather" id="weather">--°C</div>
+    <div id="city" class="small"></div>
+  </div>
+
+  <div class="panel">
+    <h3>Eventos</h3>
+    <ul id="events"></ul>
+  </div>
+
+  <div class="panel">
+    <h3>Estado</h3>
+    <div id="battery">Batería: --%</div>
+  </div>
+
+</div>
+
+<script>
+// ⏰ CLOCK
+function updateClock() {
+  var now = new Date();
+  var h = now.getHours().toString().padStart(2,'0');
+  var m = now.getMinutes().toString().padStart(2,'0');
+
+  document.getElementById("clock").innerHTML = h + ":" + m;
+
+  var options = { weekday:'long', day:'numeric', month:'long' };
+  document.getElementById("date").innerHTML = now.toLocaleDateString('es-ES', options);
+
+  // 🌙 NIGHT MODE
+  if (h >= 22 || h < 6) {
+    document.body.style.background = "#000";
+  }
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+
+// 📍 GEO + CLIMA + CIUDAD
+navigator.geolocation.getCurrentPosition(function(pos) {
+  var lat = pos.coords.latitude;
+  var lon = pos.coords.longitude;
+
+  // clima
+  fetch(⁠ https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true ⁠)
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById("weather").innerHTML = data.current_weather.temperature + "°C";
+  });
+
+  // ciudad
+  fetch(⁠ https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon} ⁠)
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById("city").innerHTML = data.address.city || data.address.town;
+  });
+
+});
+
+
+// 🔋 BATERÍA
+if (navigator.getBattery) {
+  navigator.getBattery().then(function(battery) {
+    function updateBattery() {
+      document.getElementById("battery").innerHTML =
+        "Batería: " + Math.round(battery.level * 100) + "%";
+    }
+    updateBattery();
+    battery.onlevelchange = updateBattery;
+  });
+}
+
+
+// 📆 EVENTOS (SIMULADO → luego lo conectamos real)
+var eventos = [
+  "10:00 - Daily Standup",
+  "13:00 - Almuerzo",
+  "18:00 - Gym",
+  "21:00 - Relax"
+];
+
+var ul = document.getElementById("events");
+eventos.forEach(e => {
+  var li = document.createElement("li");
+  li.textContent = e;
+  ul.appendChild(li);
+});
+</script>
+
+</body>
+</html>
