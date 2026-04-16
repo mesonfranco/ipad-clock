@@ -18,20 +18,15 @@ body {
   padding: 40px;
 }
 
-/* CLOCK */
 .clock { font-size: 100px; }
-
-/* DATE */
 .date { font-size: 20px; opacity: 0.7; margin-bottom: 30px; }
 
-/* GRID */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
-/* CARDS */
 .card {
   background: rgba(0,255,159,0.05);
   border: 1px solid rgba(0,255,159,0.2);
@@ -58,7 +53,6 @@ body {
   overflow: hidden;
 }
 
-/* sweep */
 .sweep {
   position: absolute;
   width: 100%;
@@ -68,7 +62,6 @@ body {
   animation: spin 3s linear infinite;
 }
 
-/* esfera */
 .ball {
   width: 8px;
   height: 8px;
@@ -77,7 +70,6 @@ body {
   position: absolute;
 }
 
-/* animación radar */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -154,52 +146,68 @@ body {
 
 <script>
 
-// CLOCK
+// ⏰ CLOCK + ESTADO (FIX REAL)
 function updateClock() {
   var now = new Date();
   var h = ("0" + now.getHours()).slice(-2);
   var m = ("0" + now.getMinutes()).slice(-2);
 
-  clock.innerHTML = h + ":" + m;
+  document.getElementById("clock").innerHTML = h + ":" + m;
 
-  date.innerHTML = now.toLocaleDateString("es-ES", {
-    weekday: "long", day: "numeric", month: "long"
-  });
+  document.getElementById("date").innerHTML =
+    now.toLocaleDateString("es-ES", {
+      weekday: "long",
+      day: "numeric",
+      month: "long"
+    });
 
-  status.innerHTML =
+  var estado =
     h < 6 ? "Noche 🌙" :
     h < 12 ? "Mañana ☀️" :
-    h < 19 ? "Tarde 🌤" : "Noche 🌙";
+    h < 19 ? "Tarde 🌤" :
+    "Noche 🌙";
+
+  document.getElementById("status").innerHTML = estado;
 }
 
 setInterval(updateClock, 60000);
 updateClock();
 
-// GEO + CLIMA
+
+// 🌍 GEO + CLIMA
 navigator.geolocation.getCurrentPosition(function(pos) {
   var lat = pos.coords.latitude;
   var lon = pos.coords.longitude;
 
   fetch("https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon+"&current_weather=true")
     .then(r=>r.json())
-    .then(d=> weather.innerHTML = d.current_weather.temperature + "°C");
+    .then(d=> {
+      document.getElementById("weather").innerHTML =
+        d.current_weather.temperature + "°C";
+    });
 
   fetch("https://nominatim.openstreetmap.org/reverse?format=json&lat="+lat+"&lon="+lon)
     .then(r=>r.json())
-    .then(d=> city.innerHTML = d.address.city || d.address.town);
+    .then(d=> {
+      document.getElementById("city").innerHTML =
+        d.address.city || d.address.town;
+    });
 });
 
-// FRASES
+
+// 🧠 FRASES
 var quotes = [
   "Más allá del límite",
   "Entrena como un Saiyajin",
   "Nunca te rindas",
   "El poder crece en la adversidad"
 ];
-quote.innerHTML = quotes[Math.floor(Math.random()*quotes.length)];
+
+document.getElementById("quote").innerHTML =
+  quotes[Math.floor(Math.random()*quotes.length)];
 
 
-// 🟠 RADAR DBZ DINÁMICO
+// 🟠 RADAR DBZ
 var radar = document.getElementById("radar");
 var balls = [];
 
@@ -210,7 +218,6 @@ for (var i=0;i<7;i++){
   balls.push({el:b, x:Math.random()*140, y:Math.random()*140});
 }
 
-// movimiento
 setInterval(function(){
   balls.forEach(function(b){
     b.x += (Math.random()-0.5)*10;
@@ -224,29 +231,32 @@ setInterval(function(){
   });
 }, 500);
 
-// 🚨 ALERTA
-setInterval(function(){
-  if (Math.random() > 0.7) {
-    document.getElementById("radarCard").classList.add("alert");
-    beep();
-    setTimeout(()=> radarCard.classList.remove("alert"), 1000);
-  }
-}, 3000);
 
-// 🔊 SONIDO (beep simple)
+// 🚨 ALERTA + SONIDO
 function beep(){
   var ctx = new (window.AudioContext || window.webkitAudioContext)();
   var osc = ctx.createOscillator();
-  osc.type = "sine";
   osc.frequency.setValueAtTime(600, ctx.currentTime);
   osc.connect(ctx.destination);
   osc.start();
   setTimeout(()=> osc.stop(), 100);
 }
 
-// MATRIX
+setInterval(function(){
+  if (Math.random() > 0.7) {
+    document.getElementById("radarCard").classList.add("alert");
+    beep();
+    setTimeout(()=> {
+      document.getElementById("radarCard").classList.remove("alert");
+    }, 1000);
+  }
+}, 3000);
+
+
+// 💻 MATRIX
 var c = document.getElementById("matrix");
 var ctx = c.getContext("2d");
+
 c.width = c.offsetWidth;
 c.height = 150;
 
