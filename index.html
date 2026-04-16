@@ -2,13 +2,13 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Retro Dashboard</title>
+<title>Retro Radar Dashboard</title>
 
 <style>
 
 body {
   margin: 0;
-  background: #0a0a0a;
+  background: #050505;
   color: #00ff9f;
   font-family: "Courier New", monospace;
   display: flex;
@@ -21,7 +21,6 @@ body {
 /* ⏰ CLOCK */
 .clock {
   font-size: 100px;
-  color: #00ff9f;
 }
 
 /* DATE */
@@ -38,7 +37,7 @@ body {
   gap: 20px;
 }
 
-/* 🧊 CARDS */
+/* CARDS */
 .card {
   background: rgba(0,255,159,0.05);
   border: 1px solid rgba(0,255,159,0.2);
@@ -58,46 +57,78 @@ body {
   font-size: 20px;
 }
 
-/* 💿 TOCADISCOS */
-.player {
-  display: flex;
-  align-items: center;
-  gap: 20px;
+/* 🟢 RADAR */
+.radar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 2px solid #00ff9f;
+  position: relative;
+  overflow: hidden;
 }
 
-/* DISCO */
-.vinyl {
-  width: 80px;
-  height: 80px;
+/* líneas radar */
+.radar::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: rgba(0,255,159,0.3);
+  top: 50%;
+}
+
+.radar::after {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 2px;
+  background: rgba(0,255,159,0.3);
+  left: 50%;
+}
+
+/* barrido */
+.sweep {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: conic-gradient(rgba(0,255,159,0.3), transparent 60%);
   border-radius: 50%;
-  background: radial-gradient(circle, #111 40%, #000 60%);
-  border: 3px solid #00ff9f;
   animation: spin 3s linear infinite;
 }
 
-/* CENTRO DEL DISCO */
-.vinyl::after {
-  content: "";
-  width: 12px;
-  height: 12px;
+/* puntos (esferas) */
+.dot {
+  width: 6px;
+  height: 6px;
   background: #00ff9f;
   border-radius: 50%;
   position: absolute;
-  margin: 34px;
 }
 
-/* BRAZO */
-.arm {
-  width: 40px;
-  height: 4px;
-  background: #00ff9f;
-  transform: rotate(25deg);
-}
+/* posiciones random */
+.dot1 { top: 30%; left: 60%; }
+.dot2 { top: 70%; left: 40%; }
+.dot3 { top: 50%; left: 80%; }
 
-/* ANIMACIÓN */
+/* animación radar */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+/* 📺 EFECTO CRT */
+.crt {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    rgba(0,0,0,0.2) 0px,
+    rgba(0,0,0,0.2) 2px,
+    transparent 2px,
+    transparent 4px
+  );
+  opacity: 0.2;
 }
 
 </style>
@@ -131,22 +162,23 @@ body {
   </div>
 
   <div class="card">
-    <div class="title">Música</div>
-    <div class="player">
-      <div class="vinyl"></div>
-      <div class="arm"></div>
+    <div class="title">Radar DBZ</div>
+    <div class="radar">
+      <div class="sweep"></div>
+      <div class="dot dot1"></div>
+      <div class="dot dot2"></div>
+      <div class="dot dot3"></div>
     </div>
-    <audio id="music" autoplay loop>
-      <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-    </audio>
   </div>
 
   <div class="card">
-    <div class="title">Boca Juniors</div>
-    <div class="value" id="boca">Cargando...</div>
+    <div class="title">Sistema</div>
+    <div class="value" id="system">OK</div>
   </div>
 
 </div>
+
+<div class="crt"></div>
 
 <script>
 
@@ -203,30 +235,15 @@ navigator.geolocation.getCurrentPosition(function(pos) {
 
 // 🧠 FRASES
 var quotes = [
-  "Disciplina > motivación",
-  "Menos distracciones, más foco",
-  "Hoy haces tu futuro",
-  "Modo enfoque activado",
-  "Hacelo aunque no tengas ganas"
+  "Modo entrenamiento activado",
+  "El poder viene de la disciplina",
+  "Nunca subestimes tu potencial",
+  "Sigue entrenando",
+  "Más allá del límite"
 ];
 
 document.getElementById("quote").innerHTML =
   quotes[Math.floor(Math.random() * quotes.length)];
-
-
-// ⚽ BOCA
-var lastMatch = "vs Universidad Católica (2-1) 🔥";
-var nextMatch = "vs Independiente - 11/04 19:30";
-
-document.getElementById("boca").innerHTML =
-  "Último: " + lastMatch + "<br><br>" +
-  "Próximo: " + nextMatch;
-
-
-// 🎵 FIX autoplay en iPad (requiere interacción)
-document.body.addEventListener("click", function() {
-  document.getElementById("music").play();
-});
 
 </script>
 
