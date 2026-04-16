@@ -2,15 +2,15 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Minimal Dashboard</title>
+<title>Retro Dashboard</title>
 
 <style>
 
 body {
   margin: 0;
-  background: #0b0b0b;
-  color: #e0f7f7;
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0a0a0a;
+  color: #00ff9f;
+  font-family: "Courier New", monospace;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -20,14 +20,14 @@ body {
 
 /* ⏰ CLOCK */
 .clock {
-  font-size: 120px;
-  font-weight: 200;
+  font-size: 100px;
+  color: #00ff9f;
 }
 
-/* 📅 DATE */
+/* DATE */
 .date {
-  font-size: 22px;
-  opacity: 0.6;
+  font-size: 20px;
+  opacity: 0.7;
   margin-bottom: 30px;
 }
 
@@ -40,26 +40,64 @@ body {
 
 /* 🧊 CARDS */
 .card {
-  background: rgba(255,255,255,0.04);
-  border-radius: 15px;
+  background: rgba(0,255,159,0.05);
+  border: 1px solid rgba(0,255,159,0.2);
+  border-radius: 10px;
   padding: 20px;
-  transition: 0.3s;
 }
 
-.card:hover {
-  background: rgba(255,255,255,0.07);
-}
-
-/* TITULOS */
+/* TITLES */
 .title {
-  font-size: 14px;
-  opacity: 0.5;
+  font-size: 12px;
+  opacity: 0.6;
   margin-bottom: 10px;
 }
 
-/* VALORES */
+/* VALUES */
 .value {
-  font-size: 22px;
+  font-size: 20px;
+}
+
+/* 💿 TOCADISCOS */
+.player {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* DISCO */
+.vinyl {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #111 40%, #000 60%);
+  border: 3px solid #00ff9f;
+  animation: spin 3s linear infinite;
+}
+
+/* CENTRO DEL DISCO */
+.vinyl::after {
+  content: "";
+  width: 12px;
+  height: 12px;
+  background: #00ff9f;
+  border-radius: 50%;
+  position: absolute;
+  margin: 34px;
+}
+
+/* BRAZO */
+.arm {
+  width: 40px;
+  height: 4px;
+  background: #00ff9f;
+  transform: rotate(25deg);
+}
+
+/* ANIMACIÓN */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 </style>
@@ -93,8 +131,14 @@ body {
   </div>
 
   <div class="card">
-    <div class="title">Próximas horas</div>
-    <div class="value" id="forecast">Cargando...</div>
+    <div class="title">Música</div>
+    <div class="player">
+      <div class="vinyl"></div>
+      <div class="arm"></div>
+    </div>
+    <audio id="music" autoplay loop>
+      <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
   </div>
 
   <div class="card">
@@ -109,7 +153,6 @@ body {
 // ⏰ CLOCK
 function updateClock() {
   var now = new Date();
-
   var h = now.getHours();
   var m = now.getMinutes();
 
@@ -132,7 +175,7 @@ function updateClock() {
   document.getElementById("status").innerHTML = status;
 }
 
-setInterval(updateClock, 1000);
+setInterval(updateClock, 60000);
 updateClock();
 
 
@@ -141,20 +184,11 @@ navigator.geolocation.getCurrentPosition(function(pos) {
   var lat = pos.coords.latitude;
   var lon = pos.coords.longitude;
 
-  fetch("https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&hourly=temperature_2m&current_weather=true")
+  fetch("https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon + "&current_weather=true")
     .then(r => r.json())
     .then(data => {
-
       document.getElementById("weather").innerHTML =
         data.current_weather.temperature + "°C";
-
-      var hours = data.hourly.temperature_2m.slice(0, 4);
-
-      document.getElementById("forecast").innerHTML =
-        "Ahora: " + hours[0] + "°C<br>" +
-        "+1h: " + hours[1] + "°C<br>" +
-        "+2h: " + hours[2] + "°C<br>" +
-        "+3h: " + hours[3] + "°C";
     });
 
   fetch("https://nominatim.openstreetmap.org/reverse?format=json&lat=" + lat + "&lon=" + lon)
@@ -170,9 +204,9 @@ navigator.geolocation.getCurrentPosition(function(pos) {
 // 🧠 FRASES
 var quotes = [
   "Disciplina > motivación",
-  "Progreso constante",
   "Menos distracciones, más foco",
   "Hoy haces tu futuro",
+  "Modo enfoque activado",
   "Hacelo aunque no tengas ganas"
 ];
 
@@ -187,6 +221,12 @@ var nextMatch = "vs Independiente - 11/04 19:30";
 document.getElementById("boca").innerHTML =
   "Último: " + lastMatch + "<br><br>" +
   "Próximo: " + nextMatch;
+
+
+// 🎵 FIX autoplay en iPad (requiere interacción)
+document.body.addEventListener("click", function() {
+  document.getElementById("music").play();
+});
 
 </script>
 
