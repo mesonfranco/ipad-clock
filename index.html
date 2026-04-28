@@ -2,53 +2,82 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Ultra Dashboard</title>
+<title>Modern Dashboard</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
 
 <style>
 
 body {
   margin: 0;
-  background: #050505;
-  color: #00ff9f;
-  font-family: "Courier New", monospace;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   height: 100vh;
-  padding: 40px;
+  padding: 30px;
+
+  /* 🌈 fondo moderno */
+  background: linear-gradient(135deg, #667eea, #764ba2, #ff7eb3);
+  background-size: 400% 400%;
+  animation: gradientMove 10s ease infinite;
+
+  color: #ffffff;
 }
 
-.clock { font-size: 100px; }
-.date { font-size: 20px; opacity: 0.7; margin-bottom: 30px; }
+/* animación fondo */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 
+/* reloj */
+.clock {
+  font-size: 90px;
+  font-weight: 300;
+}
+
+/* fecha */
+.date {
+  font-size: 20px;
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
+
+/* grid */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 15px;
 }
 
+/* 🧊 glass cards */
 .card {
-  background: rgba(0,255,159,0.05);
-  border: 1px solid rgba(0,255,159,0.2);
-  border-radius: 10px;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
   padding: 20px;
-  transition: 0.3s;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
 }
 
-.alert {
-  border-color: red !important;
-  box-shadow: 0 0 10px red;
+/* título */
+.title {
+  font-size: 13px;
+  opacity: 0.7;
+  margin-bottom: 8px;
 }
 
-.title { font-size: 12px; opacity: 0.6; margin-bottom: 10px; }
-.value { font-size: 20px; }
+/* valor */
+.value {
+  font-size: 22px;
+  font-weight: 500;
+}
 
-/* RADAR */
+/* radar */
 .radar {
-  width: 150px;
-  height: 150px;
+  width: 140px;
+  height: 140px;
   border-radius: 50%;
-  border: 2px solid #00ff9f;
+  border: 2px solid rgba(255,255,255,0.3);
   position: relative;
   overflow: hidden;
 }
@@ -57,45 +86,30 @@ body {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: conic-gradient(rgba(0,255,159,0.3), transparent 60%);
-  border-radius: 50%;
+  background: conic-gradient(rgba(255,255,255,0.3), transparent 60%);
   animation: spin 3s linear infinite;
 }
 
 .ball {
   width: 8px;
   height: 8px;
-  background: orange;
+  background: #ffcc00;
   border-radius: 50%;
   position: absolute;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* MATRIX */
+/* matrix canvas */
 #matrix {
   width: 100%;
   height: 150px;
-  background: black;
   border-radius: 10px;
+  background: rgba(0,0,0,0.5);
 }
 
-/* CRT */
-.crt {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    rgba(0,0,0,0.2) 0px,
-    rgba(0,0,0,0.2) 2px,
-    transparent 2px,
-    transparent 4px
-  );
-  opacity: 0.2;
+/* animación */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 </style>
@@ -142,11 +156,9 @@ body {
 
 </div>
 
-<div class="crt"></div>
-
 <script>
 
-// ⏰ CLOCK + ESTADO (FIX REAL)
+// CLOCK
 function updateClock() {
   var now = new Date();
   var h = ("0" + now.getHours()).slice(-2);
@@ -174,40 +186,33 @@ setInterval(updateClock, 60000);
 updateClock();
 
 
-// 🌍 GEO + CLIMA
+// GEO + CLIMA
 navigator.geolocation.getCurrentPosition(function(pos) {
   var lat = pos.coords.latitude;
   var lon = pos.coords.longitude;
 
   fetch("https://api.open-meteo.com/v1/forecast?latitude="+lat+"&longitude="+lon+"&current_weather=true")
     .then(r=>r.json())
-    .then(d=> {
-      document.getElementById("weather").innerHTML =
-        d.current_weather.temperature + "°C";
-    });
+    .then(d=> document.getElementById("weather").innerHTML = d.current_weather.temperature + "°C");
 
   fetch("https://nominatim.openstreetmap.org/reverse?format=json&lat="+lat+"&lon="+lon)
     .then(r=>r.json())
-    .then(d=> {
-      document.getElementById("city").innerHTML =
-        d.address.city || d.address.town;
-    });
+    .then(d=> document.getElementById("city").innerHTML = d.address.city || d.address.town);
 });
 
 
-// 🧠 FRASES
+// FRASES
 var quotes = [
-  "Más allá del límite",
-  "Entrena como un Saiyajin",
-  "Nunca te rindas",
-  "El poder crece en la adversidad"
+  "Sigue avanzando",
+  "Menos excusas, más acción",
+  "El progreso es diario",
+  "Hoy es tu oportunidad"
 ];
-
 document.getElementById("quote").innerHTML =
   quotes[Math.floor(Math.random()*quotes.length)];
 
 
-// 🟠 RADAR DBZ
+// RADAR
 var radar = document.getElementById("radar");
 var balls = [];
 
@@ -215,16 +220,16 @@ for (var i=0;i<7;i++){
   var b = document.createElement("div");
   b.className = "ball";
   radar.appendChild(b);
-  balls.push({el:b, x:Math.random()*140, y:Math.random()*140});
+  balls.push({el:b, x:Math.random()*130, y:Math.random()*130});
 }
 
 setInterval(function(){
   balls.forEach(function(b){
-    b.x += (Math.random()-0.5)*10;
-    b.y += (Math.random()-0.5)*10;
+    b.x += (Math.random()-0.5)*8;
+    b.y += (Math.random()-0.5)*8;
 
-    b.x = Math.max(0, Math.min(140, b.x));
-    b.y = Math.max(0, Math.min(140, b.y));
+    b.x = Math.max(0, Math.min(130, b.x));
+    b.y = Math.max(0, Math.min(130, b.y));
 
     b.el.style.left = b.x + "px";
     b.el.style.top = b.y + "px";
@@ -232,42 +237,24 @@ setInterval(function(){
 }, 500);
 
 
-// 🚨 ALERTA + SONIDO
-function beep(){
-  var ctx = new (window.AudioContext || window.webkitAudioContext)();
-  var osc = ctx.createOscillator();
-  osc.frequency.setValueAtTime(600, ctx.currentTime);
-  osc.connect(ctx.destination);
-  osc.start();
-  setTimeout(()=> osc.stop(), 100);
-}
-
-setInterval(function(){
-  if (Math.random() > 0.7) {
-    document.getElementById("radarCard").classList.add("alert");
-    beep();
-    setTimeout(()=> {
-      document.getElementById("radarCard").classList.remove("alert");
-    }, 1000);
-  }
-}, 3000);
-
-
-// 💻 MATRIX
+// MATRIX
 var c = document.getElementById("matrix");
 var ctx = c.getContext("2d");
-
 c.width = c.offsetWidth;
 c.height = 150;
 
 var letters = "francoezequiel";
-var drops = Array(Math.floor(c.width/14)).fill(1);
+var drops = [];
+
+for (var i = 0; i < Math.floor(c.width/14); i++) {
+  drops[i] = 1;
+}
 
 setInterval(function(){
   ctx.fillStyle = "rgba(0,0,0,0.05)";
   ctx.fillRect(0,0,c.width,c.height);
 
-  ctx.fillStyle="#00ff9f";
+  ctx.fillStyle="#00ffcc";
   ctx.font="14px monospace";
 
   for(var i=0;i<drops.length;i++){
